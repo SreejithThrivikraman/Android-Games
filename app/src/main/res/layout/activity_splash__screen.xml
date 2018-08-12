@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Splash_Screen"
+    android:background="@drawable/game_background">
+
+
+    <TextView
+        android:id="@+id/loading_label"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:fontFamily="sans-serif"
+        android:text = "Rock..Paper..Scissors"
+        android:textAlignment="center"
+        android:layout_marginTop="54dp"
+        android:textSize="30dp"
+        android:textStyle="bold"
+        android:textColor="@color/color_black"/>
+
+    <ImageView
+        android:id="@+id/splash_image"
+        android:layout_width="match_parent"
+        android:layout_height="248dp"
+        android:layout_margin="16dp"
+        app:srcCompat="@drawable/rpc" />
+
+
+
+
+
+
+    <com.github.ybq.android.spinkit.SpinKitView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/spin_kit"
+        style="@style/SpinKitView.Large.Wave"
+        android:layout_width="127dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        app:SpinKit_Color="@color/color_black" />
+
+
+    <TextView
+        android:id="@+id/splash_Label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:fontFamily="sans-serif"
+        android:text="Loading ..."
+        android:textAlignment="center"
+        android:textSize="20dp"
+        android:textColor="@color/color_black"
+        android:textStyle="bold|italic" />
+
+
+</LinearLayout>

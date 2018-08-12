@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".DashBoard"
+    android:background="@drawable/game_background">
+
+
+    <ImageView
+        android:id="@+id/animation_images"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:paddingTop="60dp"
+        app:srcCompat="@drawable/scissors"
+        android:layout_margin="16dp"/>
+
+    <Button
+        android:id="@+id/Host_Game_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@drawable/green_button"
+        android:text="Host New game !"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+        android:textStyle="italic|bold" />
+
+    <Button
+        android:id="@+id/Join_Game_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@drawable/red_button"
+        android:text="Join Game !"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+        android:textStyle="italic|bold" />
+
+
+
+
+</LinearLayout>

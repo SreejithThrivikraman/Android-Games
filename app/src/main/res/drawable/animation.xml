@@ -1,0 +1,9 @@
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false"
+
+
+    >
+    <item android:drawable="@drawable/stone" android:duration="1000" />
+    <item android:drawable="@drawable/paper" android:duration="1000" />
+    <item android:drawable="@drawable/scissors" android:duration="1000" />
+</animation-list>
