@@ -35,10 +35,8 @@ public class DashBoard extends AppCompatActivity implements ShakeDetector.Listen
     }
     // this a mandatory function
     // it's required by the ShakeDetector.Listener class
-    @Override public void hearShake() {
+    @Override public void hearShake()  {
 
 
     }
-
-
 }
