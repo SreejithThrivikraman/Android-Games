@@ -25,15 +25,15 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-<<<<<<< HEAD
+
     implementation 'com.github.ybq:Android-SpinKit:1.1.0'
 
     implementation 'com.google.android.gms:play-services-nearby:11.8.0'
     implementation 'com.google.code.gson:gson:2.4'
 
 
-=======
-    compile 'com.github.ybq:Android-SpinKit:1.1.0'
+
+    implementation 'com.github.ybq:Android-SpinKit:1.1.0'
     implementation 'com.squareup:seismic:1.0.2'
->>>>>>> 7cf69f30dada84a1c84981dc228d9e197fbc62c7
+
 }
