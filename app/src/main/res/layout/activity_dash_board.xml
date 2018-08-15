@@ -28,7 +28,8 @@
         android:text="Host New game !"
         android:textColor="@android:color/white"
         android:textSize="20dp"
-        android:textStyle="italic|bold" />
+        android:textStyle="italic|bold"
+        android:onClick="initiate_host_screen"/>
 
     <Button
         android:id="@+id/Join_Game_button"
@@ -39,7 +40,8 @@
         android:text="Join Game !"
         android:textColor="@android:color/white"
         android:textSize="20dp"
-        android:textStyle="italic|bold" />
+        android:textStyle="italic|bold"
+        android:onClick="initiate_client_screen"/>
 
 
 

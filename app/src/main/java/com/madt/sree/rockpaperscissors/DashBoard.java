@@ -1,5 +1,6 @@
 package com.madt.sree.rockpaperscissors;
 
+import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,4 +28,17 @@ public class DashBoard extends AppCompatActivity
 
 
     }
+
+    public void initiate_host_screen(View v)
+    {
+        Intent host_screen = new Intent(getApplicationContext(),waiting_for_players.class);
+        startActivity(host_screen);
+    }
+
+    public void initiate_client_screen(View v)
+    {
+        Intent client_screen = new Intent(getApplicationContext(),waiting_for_host.class);
+        startActivity(client_screen);
+    }
+
 }
