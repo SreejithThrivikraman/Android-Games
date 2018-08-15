@@ -16,6 +16,9 @@ import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
 import com.google.android.gms.nearby.connection.ConnectionResolution;
 import com.google.android.gms.nearby.connection.Connections;
+import com.google.android.gms.nearby.connection.Payload;
+import com.google.android.gms.nearby.connection.PayloadCallback;
+import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
 
@@ -66,13 +69,15 @@ public class waiting_for_players extends AppCompatActivity implements GoogleApiC
      *    2. completes a connection attempt
      *    3. disconnects from the connection
      */
-     private final ConnectionLifecycleCallback mConnectionLifecycleCallback =
+     public final ConnectionLifecycleCallback mConnectionLifecycleCallback =
             new ConnectionLifecycleCallback()
             {
                 @Override
                 public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo)
                 {
                     Log.i(TAG, endpointId + " connection initiated");
+
+                   Nearby.getConnectionsClient(getApplicationContext()).acceptConnection(endpointId,mPayloadCallback);
 
 
 
@@ -91,6 +96,24 @@ public class waiting_for_players extends AppCompatActivity implements GoogleApiC
                 }
             };
 
+
+     // payload : receives data from the client
+
+    private final PayloadCallback mPayloadCallback =
+            new PayloadCallback() {
+                @Override
+                public void onPayloadReceived(String endpointId, Payload payload)
+                {
+                  //  opponentChoice = GameChoice.valueOf(new String(payload.asBytes(), UTF_8));
+                    player_1_label.setText(endpointId.toString());
+                }
+
+                @Override
+                public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update)
+                {
+
+                }
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -150,7 +173,7 @@ public class waiting_for_players extends AppCompatActivity implements GoogleApiC
  */
     private void startAdvertising()
     {
-        //SERVICE_ID = getApplicationContext().getPackageName();
+            SERVICE_ID = getApplicationContext().getPackageName();
             Nearby.Connections.startAdvertising(
                     mGoogleApiClient,HostName,
                     SERVICE_ID,

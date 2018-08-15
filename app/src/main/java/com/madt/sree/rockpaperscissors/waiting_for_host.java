@@ -26,6 +26,9 @@ import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+
 
 //import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -40,7 +43,7 @@ public class waiting_for_host extends AppCompatActivity implements GoogleApiClie
 
     private static final Strategy STRATEGY = Strategy.P2P_STAR;
 
-    public String client_name;
+    public String client_name = NameGenerator.generate();
 
     TextView host_name_label;
 
@@ -57,7 +60,34 @@ public class waiting_for_host extends AppCompatActivity implements GoogleApiClie
                 public void onEndpointFound(
                         String endpointId, DiscoveredEndpointInfo dei)
                 {
+
+                    Nearby.getConnectionsClient(getApplicationContext()).requestConnection(
+                            client_name,
+                            endpointId,
+                            mConnectionLifecycleCallback
+
+
+                    ).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid)
+                        {
+
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener()
+                    {
+                        @Override
+                        public void onFailure(@NonNull Exception e)
+                        {
+
+                        }
+                    }) ;
+
+
                     host_name_label.setText(endpointId);
+
+                    connectionsClient.sendPayload(
+                            endpointId, Payload.fromBytes(client_name.getBytes()));
                 }
 
                 @Override
@@ -70,7 +100,30 @@ public class waiting_for_host extends AppCompatActivity implements GoogleApiClie
             };
 
 
+    public final ConnectionLifecycleCallback mConnectionLifecycleCallback =
+            new ConnectionLifecycleCallback()
+            {
+                @Override
+                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo)
+                {
+                    Log.i(TAG, endpointId + " connection initiated");
 
+
+
+                }
+
+                @Override
+                public void onConnectionResult(String endpointId, ConnectionResolution result)
+                {
+                    //player_1_label.setText(endpointId.toString());
+                }
+
+                @Override
+                public void onDisconnected(String endpointId)
+                {
+                    Log.i(TAG, endpointId + " disconnected");
+                }
+            };
 
 
 
