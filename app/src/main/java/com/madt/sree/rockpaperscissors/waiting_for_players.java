@@ -1,36 +1,39 @@
 package com.madt.sree.rockpaperscissors;
 
 import android.support.annotation.NonNull;
+
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
-
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
 import com.google.android.gms.nearby.connection.ConnectionResolution;
 import com.google.android.gms.nearby.connection.Connections;
-import com.google.android.gms.nearby.connection.Payload;
-import com.google.android.gms.nearby.connection.PayloadCallback;
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.nearby.connection.ConnectionsClient;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 
-public class waiting_for_players extends AppCompatActivity {
+
+public class waiting_for_players extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener
+
+{
 
     private ConnectionsClient connectionClient;
+    public GoogleApiClient mGoogleApiClient;
+
 
     // Code to generate and HostName name.
     // HostName name : To be displayed on opponent's device.
-    private final String HostName = NameGenerator.generate();
+    private String HostName = NameGenerator.generate();
 
     // connection strategy.
     private static final Strategy STRATEGY = Strategy.P2P_STAR;
@@ -39,79 +42,54 @@ public class waiting_for_players extends AppCompatActivity {
     private String TAG = "Connection_Debugger >>>>>>>> ";
 
 
-    private String opponentEndpointId;
-    private String opponentName;
-    private int opponentScore;
+
+    /**
+     *    service id. discoverer and advertiser can use this id to
+     *    verify each other before connecting
+     */
+
+     public static String SERVICE_ID;
+
+
+
 
     TextView player_1_label;
     TextView player_2_label;
 
 
 
-    // callback connection class object.
-    private final ConnectionLifecycleCallback connectionLifecycleCallback =
-            new ConnectionLifecycleCallback() {
+
+
+    /**
+     *    These callbacks are made when other devices:
+     *    1. tries to initiate a connection
+     *    2. completes a connection attempt
+     *    3. disconnects from the connection
+     */
+     private final ConnectionLifecycleCallback mConnectionLifecycleCallback =
+            new ConnectionLifecycleCallback()
+            {
                 @Override
-                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
-                    Log.i(TAG, "on waiting_for_players :  onConnectionInitiated: accepting connection");
-                    connectionClient.acceptConnection(endpointId, payloadCallback);
-                    opponentName = connectionInfo.getEndpointName();
+                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo)
+                {
+                    Log.i(TAG, endpointId + " connection initiated");
+
+
+
                 }
 
                 @Override
-                public void onConnectionResult(String endpointId, ConnectionResolution result) {
-                    if (result.getStatus().isSuccess()) {
-                        Log.i(TAG, "on waiting_for_players : onConnectionResult: connection successful");
-
-                      //  connectionClient.stopDiscovery();
-                       // connectionClient.stopAdvertising();
-
-                        opponentEndpointId = endpointId;
-                        player_1_label.setText(opponentEndpointId);
-                        player_2_label.setText(opponentEndpointId);
-
-
-                    } else {
-                        Log.i(TAG, "onConnectionResult: connection failed");
-                    }
+                public void onConnectionResult(String endpointId, ConnectionResolution result)
+                {
+                    player_1_label.setText(endpointId.toString());
                 }
 
                 @Override
                 public void onDisconnected(String endpointId)
                 {
-                    Log.i(TAG, "onDisconnected: disconnected from the opponent");
-
+                    Log.i(TAG, endpointId + " disconnected");
                 }
             };
-
-
-    // Callbacks for receiving payloads
-    private final PayloadCallback payloadCallback =
-            new PayloadCallback() {
-                @Override
-                public void onPayloadReceived(String endpointId, Payload payload) {
-
-                  //  receiving the name of the opponent.
-
-                 //   opponentName = GameChoice.valueOf(new String(payload.asBytes(), UTF_8));
-                }
-
-                @Override
-                public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update)
-                {
-                    // Called with progress information about an active Payload transfer, either incoming or outgoing.
-
-                    // This method is not required as no bulk payload is transfered.
-                }
-            };
-
-
-
-
-
-
-
-
 
 
     @Override
@@ -126,31 +104,76 @@ public class waiting_for_players extends AppCompatActivity {
         player_2_label = findViewById(R.id.player_2);
 
         // call for findPlayer() method
-        findPlayer();
+        // findPlayer();
+        mGoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(Nearby.CONNECTIONS_API).build();
+
+        SERVICE_ID = getApplicationContext().getPackageName();
+
     }
 
-
-
-    // code to search for new opponents
-    public void findPlayer()
+    @Override
+    protected void onStart()
     {
+        super.onStart();
+        // Connect to the GoogleApiClient if disconnected
+        if (!mGoogleApiClient.isConnected())
+        {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle)
+    {
+        SERVICE_ID = getApplicationContext().getPackageName();
         startAdvertising();
 
 
     }
 
-
-    // Broadcasts the device presence using Nearby Connections so other players can find the host.
-    private void startAdvertising()
-
+    @Override
+    public void onConnectionSuspended(int i)
     {
 
-        connectionClient.startAdvertising(
-                HostName, getPackageName(), connectionLifecycleCallback, new AdvertisingOptions(STRATEGY));
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
+    {
+            Log.e(">> Connection Error <<:","API Connection failed");
     }
 
 
-    // Callback call for connections to other devices
+/**
+ *    Set device to advertising mode by broadcasting to other
+ *    devices that are currently in discovery mode.
+ */
+    private void startAdvertising()
+    {
+        //SERVICE_ID = getApplicationContext().getPackageName();
+            Nearby.Connections.startAdvertising(
+                    mGoogleApiClient,HostName,
+                    SERVICE_ID,
+                    mConnectionLifecycleCallback,
+                    new AdvertisingOptions(STRATEGY))
+                    .setResultCallback(
+                    new ResultCallback<Connections.StartAdvertisingResult>()
+                    {
+                         @Override
+                         public void onResult(@NonNull Connections.StartAdvertisingResult result)
+                            {
+                                if (result.getStatus().isSuccess())
+                                {
+                                    Log.i(TAG, "Advertising endpoint");
+                                }
+                                else
+                                    {
+                                            Log.i(TAG, "unable to start advertising");
+                                    }
+                            }
+                    });
+    }
+
 
 
 
