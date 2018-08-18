@@ -1,129 +1,49 @@
 package com.madt.sree.rockpaperscissors;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import android.bluetooth.BluetoothDevice;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
 import android.util.Log;
-import android.view.View;
+import android.widget.ArrayAdapter;
+
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.nearby.Nearby;
-import com.google.android.gms.nearby.connection.AdvertisingOptions;
-import com.google.android.gms.nearby.connection.ConnectionInfo;
-import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
-import com.google.android.gms.nearby.connection.ConnectionResolution;
-import com.google.android.gms.nearby.connection.Connections;
-import com.google.android.gms.nearby.connection.ConnectionsClient;
-import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo;
-import com.google.android.gms.nearby.connection.DiscoveryOptions;
-import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback;
-import com.google.android.gms.nearby.connection.Payload;
-import com.google.android.gms.nearby.connection.PayloadCallback;
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
-import com.google.android.gms.nearby.connection.Strategy;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.abemart.wroup.client.WroupClient;
+import com.abemart.wroup.common.WiFiDirectBroadcastReceiver;
+import com.abemart.wroup.common.WiFiP2PError;
+import com.abemart.wroup.common.WiFiP2PInstance;
+import com.abemart.wroup.common.WroupServiceDevice;
+import com.abemart.wroup.common.listeners.ServiceDiscoveredListener;
+import com.abemart.wroup.common.messages.MessageWrapper;
+import com.abemart.wroup.service.WroupService;
+
+import java.util.List;
 
 
-//import static java.nio.charset.StandardCharsets.UTF_8;
+// The class for the client devices.
 
-public class waiting_for_host extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener
+public class waiting_for_host extends AppCompatActivity
 
 {
 
-    public GoogleApiClient mGoogleApiClient;
-    private ConnectionsClient connectionsClient;
-    private String TAG = "debugging for discovery";
 
-    private static final Strategy STRATEGY = Strategy.P2P_STAR;
+
+
+    private String TAG_CLIENT = "Client module : ";
+    private ArrayAdapter adapter;//adapter for listView
+    private WiFiDirectBroadcastReceiver wiFiDirectBroadcastReceiver;
+    public String name = "";
+
+
 
     public String client_name = NameGenerator.generate();
 
     TextView host_name_label;
+    WroupClient wroupClient;
 
-
-    /**
-     *    These callbacks are made when :
-     *    1. an endpoint that we can connect to is found
-     *    2. completes a connection attempt
-     */
-    private final EndpointDiscoveryCallback mEndpointDiscoveryCallback =
-            new EndpointDiscoveryCallback()
-            {
-                @Override
-                public void onEndpointFound(
-                        String endpointId, DiscoveredEndpointInfo dei)
-                {
-
-                    Nearby.getConnectionsClient(getApplicationContext()).requestConnection(
-                            client_name,
-                            endpointId,
-                            mConnectionLifecycleCallback
-
-
-                    ).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid)
-                        {
-
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener()
-                    {
-                        @Override
-                        public void onFailure(@NonNull Exception e)
-                        {
-
-                        }
-                    }) ;
-
-
-                    host_name_label.setText(endpointId);
-
-                    connectionsClient.sendPayload(
-                            endpointId, Payload.fromBytes(client_name.getBytes()));
-                }
-
-                @Override
-                public void onEndpointLost(String endpointId)
-                {
-                    // A previously discovered endpoint has gone away,
-                    // perhaps we might want to do some cleanup here
-                    Log.i(TAG, endpointId + " endpoint lost");
-                }
-            };
-
-
-    public final ConnectionLifecycleCallback mConnectionLifecycleCallback =
-            new ConnectionLifecycleCallback()
-            {
-                @Override
-                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo)
-                {
-                    Log.i(TAG, endpointId + " connection initiated");
-
-
-
-                }
-
-                @Override
-                public void onConnectionResult(String endpointId, ConnectionResolution result)
-                {
-                    //player_1_label.setText(endpointId.toString());
-                }
-
-                @Override
-                public void onDisconnected(String endpointId)
-                {
-                    Log.i(TAG, endpointId + " disconnected");
-                }
-            };
 
 
 
@@ -134,68 +54,84 @@ public class waiting_for_host extends AppCompatActivity implements GoogleApiClie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting_for_host);
 
+
+        wiFiDirectBroadcastReceiver = WiFiP2PInstance.getInstance(this).getBroadcastReceiver();
         host_name_label = findViewById(R.id.host_name);
-        mGoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(Nearby.CONNECTIONS_API).build();
-        client_name = getApplicationContext().getPackageName();
+        host_name_label.setText("");
+
+
+
+        wroupClient = WroupClient.getInstance(getApplicationContext());
+
+        // method to start the client service.
+        startClientDevice();
+
 
 
 
 
     }
 
-    @Override
-    protected void onStart()
+
+    private void startClientDevice()
     {
-        super.onStart();
-        // Connect to the GoogleApiClient if disconnected
-        if (!mGoogleApiClient.isConnected())
-        {
-            mGoogleApiClient.connect();
-        }
+        wroupClient.discoverServices(5000L, new ServiceDiscoveredListener() {
+
+            @Override
+            public void onNewServiceDeviceDiscovered(WroupServiceDevice serviceDevice)
+            {
+                // Found new server Device.
+
+
+
+
+
+
+                name = serviceDevice.getTxtRecordMap().get(WroupService.SERVICE_GROUP_NAME);
+                host_name_label.append(name);
+
+                // notification message to server.
+                MessageWrapper message = new MessageWrapper();
+                message.setMessage(client_name);
+                message.setMessageType(MessageWrapper.MessageType.CONNECTION_MESSAGE);
+
+                wroupClient.sendMessage(serviceDevice,message);
+
+                Toast.makeText(getApplicationContext(),"Discovered Server : " + name ,Toast.LENGTH_SHORT).show();
+
+
+                // Apply the logic to add the client name to firebase here.  //
+                // Apply the logic to add the client name to firebase here.  //
+
+
+
+
+            }
+
+            @Override
+            public void onFinishServiceDeviceDiscovered(List<WroupServiceDevice> serviceDevices) {
+                // The list of services discovered in the time indicated
+
+                Log.d(TAG_CLIENT," Total no .of Server Devices = " + serviceDevices.size());
+
+
+
+
+                Toast.makeText(getApplicationContext(),"Message sent to server " + name ,Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(WiFiP2PError wiFiP2PError)
+            {
+                // An error occurred during the searching
+                Log.e(TAG_CLIENT," Error in discovering servers.");
+
+
+            }
+        });
     }
 
-    private void startDiscovery()
 
-    {
-
-        client_name = getApplicationContext().getPackageName();
-        Nearby.Connections.startDiscovery(
-                mGoogleApiClient,
-                client_name,
-                mEndpointDiscoveryCallback,
-                new DiscoveryOptions(STRATEGY))
-                .setResultCallback(
-                        new ResultCallback<Status>() {
-                            @Override
-                            public void onResult(@NonNull Status status)
-                            {
-                                if (status.isSuccess()) {
-                                    Log.i(TAG, "Now looking for advertiser");
-                                } else {
-                                    Log.i(TAG, "Unable to start discovery");
-                                }
-                            }
-                        });
-    }
-
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle)
-    {
-       startDiscovery();
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i)
-    {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
 
 
 

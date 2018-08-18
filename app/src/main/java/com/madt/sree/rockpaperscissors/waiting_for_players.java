@@ -1,119 +1,51 @@
 package com.madt.sree.rockpaperscissors;
 
-import android.support.annotation.NonNull;
 
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+
+import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+
 import android.util.Log;
 import android.widget.TextView;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.nearby.Nearby;
-import com.google.android.gms.nearby.connection.AdvertisingOptions;
-import com.google.android.gms.nearby.connection.ConnectionInfo;
-import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
-import com.google.android.gms.nearby.connection.ConnectionResolution;
-import com.google.android.gms.nearby.connection.Connections;
-import com.google.android.gms.nearby.connection.Payload;
-import com.google.android.gms.nearby.connection.PayloadCallback;
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
-import com.google.android.gms.nearby.connection.Strategy;
-import com.google.android.gms.nearby.connection.ConnectionsClient;
+import android.widget.Toast;
+
+import com.abemart.wroup.common.WiFiDirectBroadcastReceiver;
+import com.abemart.wroup.common.WiFiP2PError;
+import com.abemart.wroup.common.WiFiP2PInstance;
+import com.abemart.wroup.common.WroupDevice;
+import com.abemart.wroup.common.listeners.ClientConnectedListener;
+import com.abemart.wroup.common.listeners.ClientDisconnectedListener;
+import com.abemart.wroup.common.listeners.DataReceivedListener;
+import com.abemart.wroup.common.listeners.ServiceRegisteredListener;
+import com.abemart.wroup.common.messages.MessageWrapper;
+import com.abemart.wroup.service.WroupService;
 
 
+// The class for host device.
 
-
-public class waiting_for_players extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener
+public class waiting_for_players extends AppCompatActivity
 
 {
 
-    private ConnectionsClient connectionClient;
-    public GoogleApiClient mGoogleApiClient;
-
+    private WiFiDirectBroadcastReceiver wiFiDirectBroadcastReceiver;
 
     // Code to generate and HostName name.
     // HostName name : To be displayed on opponent's device.
-    private String HostName = NameGenerator.generate();
 
-    // connection strategy.
-    private static final Strategy STRATEGY = Strategy.P2P_STAR;
+    public String HostName = NameGenerator.generate();
+
+
 
     // Tag for connection debugging.
-    private String TAG = "Connection_Debugger >>>>>>>> ";
-
-
-
-    /**
-     *    service id. discoverer and advertiser can use this id to
-     *    verify each other before connecting
-     */
-
-     public static String SERVICE_ID;
-
-
-
+    private String TAG = "Server module >>>>>>>> ";
 
     TextView player_1_label;
     TextView player_2_label;
+    WroupService wroupService;
 
 
-
-
-
-    /**
-     *    These callbacks are made when other devices:
-     *    1. tries to initiate a connection
-     *    2. completes a connection attempt
-     *    3. disconnects from the connection
-     */
-     public final ConnectionLifecycleCallback mConnectionLifecycleCallback =
-            new ConnectionLifecycleCallback()
-            {
-                @Override
-                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo)
-                {
-                    Log.i(TAG, endpointId + " connection initiated");
-
-                   Nearby.getConnectionsClient(getApplicationContext()).acceptConnection(endpointId,mPayloadCallback);
-
-
-
-                }
-
-                @Override
-                public void onConnectionResult(String endpointId, ConnectionResolution result)
-                {
-                    player_1_label.setText(endpointId.toString());
-                }
-
-                @Override
-                public void onDisconnected(String endpointId)
-                {
-                    Log.i(TAG, endpointId + " disconnected");
-                }
-            };
-
-
-     // payload : receives data from the client
-
-    private final PayloadCallback mPayloadCallback =
-            new PayloadCallback() {
-                @Override
-                public void onPayloadReceived(String endpointId, Payload payload)
-                {
-                  //  opponentChoice = GameChoice.valueOf(new String(payload.asBytes(), UTF_8));
-                    player_1_label.setText(endpointId.toString());
-                }
-
-                @Override
-                public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update)
-                {
-
-                }
-            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -121,81 +53,144 @@ public class waiting_for_players extends AppCompatActivity implements GoogleApiC
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting_for_players);
-        connectionClient = Nearby.getConnectionsClient(this);
+
 
         player_1_label = findViewById(R.id.player_1);
         player_2_label = findViewById(R.id.player_2);
 
-        // call for findPlayer() method
-        // findPlayer();
-        mGoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(Nearby.CONNECTIONS_API).build();
+        wiFiDirectBroadcastReceiver = WiFiP2PInstance.getInstance(this).getBroadcastReceiver();
 
-        SERVICE_ID = getApplicationContext().getPackageName();
+
+
+        wroupService = WroupService.getInstance(getApplicationContext());
+
+        System.out.println(">>>>>>>>>>>>>> Host Name : " + HostName);
+
+        player_1_label.setText("Server name :" + HostName);
+
+        // method to start the server service.
+        startServerDevice();
+
+        // method to check for the client connection and disconnection.
+      //  checkClients();
+
+
+
 
     }
 
-    @Override
-    protected void onStart()
+
+    // method to start the server service.
+    private void startServerDevice()
     {
-        super.onStart();
-        // Connect to the GoogleApiClient if disconnected
-        if (!mGoogleApiClient.isConnected())
+
+        wroupService.registerService(HostName.toString(), new ServiceRegisteredListener() {
+
+            @Override
+            public void onSuccessServiceRegistered()
+            {
+                Log.d(TAG,"Server service registered successfully.");
+            }
+
+            @Override
+            public void onErrorServiceRegistered(WiFiP2PError wiFiP2PError)
+            {
+                Toast.makeText(getApplicationContext(), "Error creating group", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+
+        wroupService.setClientConnectedListener(new ClientConnectedListener()
         {
-            mGoogleApiClient.connect();
-        }
+            @Override
+            public void onClientConnected(WroupDevice wroupDevice)
+            {
+                // New client connected to the group
+                player_2_label.append("\n" + wroupDevice.getCustomName().toString());
+
+                Log.d(TAG,wroupDevice.getCustomName().toString() + " >>>>>>>> connected");
+
+                String name = wroupDevice.getDeviceName();
+                Toast.makeText(getApplicationContext(), "Client = " + name, Toast.LENGTH_SHORT).show();
+
+
+            }
+        });
+
+
+
+        wroupService.setClientDisconnectedListener(new ClientDisconnectedListener()
+        {
+            @Override
+            public void onClientDisconnected(WroupDevice wroupDevice) {
+                // Client disconnected from the group
+
+                Log.d(TAG,wroupDevice.getCustomName().toString() + " disconnected");
+
+            }
+        });
+
+
+    }
+
+    // method to check for the client connection and disconnection.
+
+    // below code is not working :(
+    private void checkClients()
+    {
+        wroupService.setClientConnectedListener(new ClientConnectedListener()
+        {
+            @Override
+            public void onClientConnected(WroupDevice wroupDevice)
+            {
+                // New client connected to the group
+                player_2_label.append("\n" + wroupDevice.getCustomName().toString());
+
+                Log.d(TAG,wroupDevice.getCustomName().toString() + " >>>>>>>> connected");
+
+                String name = wroupDevice.getDeviceName();
+                Toast.makeText(getApplicationContext(), "Client = " + name, Toast.LENGTH_SHORT).show();
+
+
+            }
+        });
+
+        // below code is not working :(
+        wroupService.setClientDisconnectedListener(new ClientDisconnectedListener()
+        {
+            @Override
+            public void onClientDisconnected(WroupDevice wroupDevice) {
+                // Client disconnected from the group
+
+                Log.d(TAG,wroupDevice.getCustomName().toString() + " disconnected");
+
+            }
+        });
+    }
+
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+
+        unregisterReceiver(wiFiDirectBroadcastReceiver);
+
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle)
+    protected void onResume()
     {
-        SERVICE_ID = getApplicationContext().getPackageName();
-        startAdvertising();
+        super.onResume();
 
-
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        registerReceiver(wiFiDirectBroadcastReceiver, intentFilter);
     }
 
-    @Override
-    public void onConnectionSuspended(int i)
-    {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
-    {
-            Log.e(">> Connection Error <<:","API Connection failed");
-    }
-
-
-/**
- *    Set device to advertising mode by broadcasting to other
- *    devices that are currently in discovery mode.
- */
-    private void startAdvertising()
-    {
-            SERVICE_ID = getApplicationContext().getPackageName();
-            Nearby.Connections.startAdvertising(
-                    mGoogleApiClient,HostName,
-                    SERVICE_ID,
-                    mConnectionLifecycleCallback,
-                    new AdvertisingOptions(STRATEGY))
-                    .setResultCallback(
-                    new ResultCallback<Connections.StartAdvertisingResult>()
-                    {
-                         @Override
-                         public void onResult(@NonNull Connections.StartAdvertisingResult result)
-                            {
-                                if (result.getStatus().isSuccess())
-                                {
-                                    Log.i(TAG, "Advertising endpoint");
-                                }
-                                else
-                                    {
-                                            Log.i(TAG, "unable to start advertising");
-                                    }
-                            }
-                    });
-    }
 
 
 

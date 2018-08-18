@@ -56,8 +56,14 @@ public class NameGenerator
     public static String generate()
     {
         String color = first_name[random_name.nextInt(first_name.length)];
+
+        System.out.println("Length 1 = " + random_name.nextInt(first_name.length));
+
         String treat = second_name[random_name.nextInt(second_name.length)];
-        return first_name + " " + second_name;
+
+        System.out.println("Length 2 = " + random_name.nextInt(second_name.length) + treat);
+
+        return color + " " + treat ;
     }
 
 }

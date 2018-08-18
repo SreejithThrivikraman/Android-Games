@@ -2,8 +2,7 @@ package com.madt.sree.rockpaperscissors;
 
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -29,14 +28,15 @@ public class DashBoard extends AppCompatActivity implements ShakeDetector.Listen
         Image_Animation = (AnimationDrawable) anim_Images.getDrawable();
         Image_Animation.start();
 
-        SensorManager manager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        ShakeDetector detector = new ShakeDetector(this);
-        detector.start(manager);
+//        SensorManager manager = (SensorManager) getSystemService(SENSOR_SERVICE);
+//        ShakeDetector detector = new ShakeDetector(this);
+//        detector.start(manager);
 
     }
     // this a mandatory function
     // it's required by the ShakeDetector.Listener class
-    @Override public void hearShake()  {
+    @Override public void hearShake()
+    {
 
 
     }
