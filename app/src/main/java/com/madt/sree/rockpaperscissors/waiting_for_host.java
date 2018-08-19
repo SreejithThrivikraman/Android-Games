@@ -1,13 +1,12 @@
 package com.madt.sree.rockpaperscissors;
 
 
-import android.bluetooth.BluetoothDevice;
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
-
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ArrayAdapter;
-
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +18,11 @@ import com.abemart.wroup.common.WroupServiceDevice;
 import com.abemart.wroup.common.listeners.ServiceDiscoveredListener;
 import com.abemart.wroup.common.messages.MessageWrapper;
 import com.abemart.wroup.service.WroupService;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -30,13 +34,82 @@ public class waiting_for_host extends AppCompatActivity
 {
 
 
+    FirebaseDatabase database;
+    DatabaseReference root,initialise;
 
 
     private String TAG_CLIENT = "Client module : ";
     private ArrayAdapter adapter;//adapter for listView
     private WiFiDirectBroadcastReceiver wiFiDirectBroadcastReceiver;
     public String name = "";
+    Handler wait = new Handler();
+    public String client_player = "";
 
+    int delay = 1000;
+    Runnable runnable;
+
+    public static class Game {
+
+        public Boolean status;
+
+public Game() {
+
+}
+        public Game(Boolean status) {
+            this.status = status;
+            // ...
+        }
+
+    }
+
+    @Override
+    protected void onResume() {
+
+
+        wait.postDelayed( runnable = new Runnable() {
+            public void run() {
+
+                Log.d("check","in running state");
+                root.orderByChild("status").addListenerForSingleValueEvent(new ValueEventListener()  {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+
+                            //System.out.println(snapshot.getValue().toString());
+
+                            Game game = snapshot.getValue(Game.class);
+                            System.out.println(game.status);
+
+                            //start intent for rock/paper/scissor game here whenever value is true
+
+                        if(game.status == true)
+                        {
+                            System.out.println("Starting intent.....");
+                            Intent intent = new Intent(waiting_for_host.this, GameActivity.class);
+                            startActivity(intent);
+                        }
+
+                            //the code will run every 1 second until the intent is changed i.e until the admin changes the value of Game to true
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        System.out.println("The read failed: " + databaseError.getMessage());
+                    }
+
+                });
+                wait.postDelayed(runnable, delay);
+            }
+        }, delay);
+
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        wait.removeCallbacks(runnable);
+        super.onPause();
+    }
 
 
     public String client_name = NameGenerator.generate();
@@ -46,14 +119,19 @@ public class waiting_for_host extends AppCompatActivity
 
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
 
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting_for_host);
+        database = FirebaseDatabase.getInstance();
 
+        root = database.getReference("Game");
+        Log.d("check","in oncfeate state");
+
+        initialise = database.getReference("OnlineUsers");
+        Log.d("check","Created client name");
 
         wiFiDirectBroadcastReceiver = WiFiP2PInstance.getInstance(this).getBroadcastReceiver();
         host_name_label = findViewById(R.id.host_name);
@@ -62,6 +140,9 @@ public class waiting_for_host extends AppCompatActivity
 
 
         wroupClient = WroupClient.getInstance(getApplicationContext());
+
+        Bundle bundle  = getIntent().getExtras();
+        client_player  = bundle.getString("Player Name");
 
         // method to start the client service.
         startClientDevice();
@@ -97,11 +178,19 @@ public class waiting_for_host extends AppCompatActivity
 
                 wroupClient.sendMessage(serviceDevice,message);
 
+
+
+                CreateGame(client_player);
                 Toast.makeText(getApplicationContext(),"Discovered Server : " + name ,Toast.LENGTH_SHORT).show();
 
 
                 // Apply the logic to add the client name to firebase here.  //
                 // Apply the logic to add the client name to firebase here.  //
+
+
+
+
+
 
 
 
@@ -131,7 +220,12 @@ public class waiting_for_host extends AppCompatActivity
         });
     }
 
+    //Every play that want to join a game call this function
+    public void CreateGame(String player)
+    {
 
+        initialise.child(player).setValue("Client Player");
+    }
 
 
 

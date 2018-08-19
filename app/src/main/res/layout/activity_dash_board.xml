@@ -19,6 +19,18 @@
         app:srcCompat="@drawable/scissors"
         android:layout_margin="16dp"/>
 
+
+    <EditText
+        android:id="@+id/player_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="@string/Player_Name"
+        android:inputType="textPersonName"
+        android:textAlignment="center"
+        android:textColor="@color/White"
+        android:textStyle="bold" />
+
     <Button
         android:id="@+id/Host_Game_button"
         android:layout_width="match_parent"
