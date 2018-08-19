@@ -7,6 +7,8 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +23,8 @@ import com.abemart.wroup.common.listeners.DataReceivedListener;
 import com.abemart.wroup.common.listeners.ServiceRegisteredListener;
 import com.abemart.wroup.common.messages.MessageWrapper;
 import com.abemart.wroup.service.WroupService;
+
+import java.util.ArrayList;
 
 
 // The class for host device.
@@ -47,6 +51,8 @@ public class waiting_for_players extends AppCompatActivity
 
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
 
@@ -56,7 +62,7 @@ public class waiting_for_players extends AppCompatActivity
 
 
         player_1_label = findViewById(R.id.player_1);
-        player_2_label = findViewById(R.id.player_2);
+
 
         wiFiDirectBroadcastReceiver = WiFiP2PInstance.getInstance(this).getBroadcastReceiver();
 
@@ -67,6 +73,21 @@ public class waiting_for_players extends AppCompatActivity
         System.out.println(">>>>>>>>>>>>>> Host Name : " + HostName);
 
         player_1_label.setText("Server name :" + HostName);
+
+        ArrayList<String> movies = new ArrayList<>();
+        movies.add("3 Idiots");
+        movies.add("Deadpool 2");
+        movies.add("Gangs of Wassaypur");
+        movies.add("Go Goa Gone");
+        movies.add("Garam Masala");
+        movies.add("Black Panther");
+
+
+
+
+
+
+
 
         // method to start the server service.
         startServerDevice();

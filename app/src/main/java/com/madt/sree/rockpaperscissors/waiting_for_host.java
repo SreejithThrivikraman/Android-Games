@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,18 +20,20 @@ import com.abemart.wroup.common.WroupServiceDevice;
 import com.abemart.wroup.common.listeners.ServiceDiscoveredListener;
 import com.abemart.wroup.common.messages.MessageWrapper;
 import com.abemart.wroup.service.WroupService;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 // The class for the client devices.
 
-public class waiting_for_host extends AppCompatActivity
+public class waiting_for_host extends AppCompatActivity implements ChildEventListener
 
 {
 
@@ -45,8 +49,47 @@ public class waiting_for_host extends AppCompatActivity
     Handler wait = new Handler();
     public String client_player = "";
 
+    List<String> player_array_list = new ArrayList<String>();
+
     int delay = 1000;
     Runnable runnable;
+
+
+    // firebase codes for child listner
+
+    @Override
+    public void onChildAdded(DataSnapshot dataSnapshot, String s)
+    {
+
+    }
+
+    @Override
+    public void onChildChanged(DataSnapshot dataSnapshot, String s)
+    {
+
+    }
+
+    @Override
+    public void onChildRemoved(DataSnapshot dataSnapshot)
+    {
+
+    }
+
+
+    @Override
+    public void onChildMoved(DataSnapshot dataSnapshot, String s)
+    {
+
+    }
+
+    @Override
+    public void onCancelled(DatabaseError databaseError)
+    {
+
+    }
+
+
+    // firebase codes for child listner
 
     public static class Game {
 
@@ -119,6 +162,7 @@ public Game() {
 
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
 
@@ -143,6 +187,10 @@ public Game() {
 
         Bundle bundle  = getIntent().getExtras();
         client_player  = bundle.getString("Player Name");
+
+
+
+
 
         // method to start the client service.
         startClientDevice();
@@ -188,13 +236,6 @@ public Game() {
                 // Apply the logic to add the client name to firebase here.  //
 
 
-
-
-
-
-
-
-
             }
 
             @Override
@@ -215,7 +256,6 @@ public Game() {
                 // An error occurred during the searching
                 Log.e(TAG_CLIENT," Error in discovering servers.");
 
-
             }
         });
     }
@@ -226,6 +266,8 @@ public Game() {
 
         initialise.child(player).setValue("Client Player");
     }
+
+
 
 
 
