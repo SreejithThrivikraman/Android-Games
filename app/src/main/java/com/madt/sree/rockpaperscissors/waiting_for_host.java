@@ -33,7 +33,7 @@ import java.util.List;
 
 // The class for the client devices.
 
-public class waiting_for_host extends AppCompatActivity implements ChildEventListener
+public class waiting_for_host extends AppCompatActivity
 
 {
 
@@ -55,38 +55,7 @@ public class waiting_for_host extends AppCompatActivity implements ChildEventLis
     Runnable runnable;
 
 
-    // firebase codes for child listner
 
-    @Override
-    public void onChildAdded(DataSnapshot dataSnapshot, String s)
-    {
-
-    }
-
-    @Override
-    public void onChildChanged(DataSnapshot dataSnapshot, String s)
-    {
-
-    }
-
-    @Override
-    public void onChildRemoved(DataSnapshot dataSnapshot)
-    {
-
-    }
-
-
-    @Override
-    public void onChildMoved(DataSnapshot dataSnapshot, String s)
-    {
-
-    }
-
-    @Override
-    public void onCancelled(DatabaseError databaseError)
-    {
-
-    }
 
 
     // firebase codes for child listner
@@ -95,10 +64,12 @@ public class waiting_for_host extends AppCompatActivity implements ChildEventLis
 
         public Boolean status;
 
-public Game() {
+        public Game()
+        {
 
-}
-        public Game(Boolean status) {
+        }
+        public Game(Boolean status)
+        {
             this.status = status;
             // ...
         }
