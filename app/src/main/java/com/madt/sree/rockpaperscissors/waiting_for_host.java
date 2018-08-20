@@ -132,8 +132,6 @@ public class waiting_for_host extends AppCompatActivity
     WroupClient wroupClient;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
 
@@ -159,10 +157,6 @@ public class waiting_for_host extends AppCompatActivity
         Bundle bundle  = getIntent().getExtras();
         client_player  = bundle.getString("Player Name");
 
-
-
-
-
         // method to start the client service.
         startClientDevice();
 
@@ -181,9 +175,6 @@ public class waiting_for_host extends AppCompatActivity
             public void onNewServiceDeviceDiscovered(WroupServiceDevice serviceDevice)
             {
                 // Found new server Device.
-
-
-
 
 
 

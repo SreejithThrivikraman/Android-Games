@@ -4,6 +4,7 @@ package com.madt.sree.rockpaperscissors;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -59,11 +60,14 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 
 
     private MyAdapter mAdapter;
+    public  RecyclerView recyclerView;
 
     public FirebaseDatabase database = FirebaseDatabase.getInstance();
 
+    // Database references.
     public DatabaseReference online_user_ref = database.getReference("OnlineUsers");
     public DatabaseReference status = database.getReference("Game/status");
+    public DatabaseReference Live_players = database.getReference("Game");
 
     private WiFiDirectBroadcastReceiver wiFiDirectBroadcastReceiver;
 
@@ -84,6 +88,12 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
     TextView player_1_label;
     TextView player_2_label;
     WroupService wroupService;
+
+    public Integer max_players = 3;
+    public Integer players_left = 0;
+    public Integer count = 0;
+
+
     public  ArrayList<String> players = new ArrayList<>();
 
 
@@ -120,6 +130,7 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 
 
         player_1_label = findViewById(R.id.player_1);
+        status.setValue(false);
 
 
         wiFiDirectBroadcastReceiver = WiFiP2PInstance.getInstance(this).getBroadcastReceiver();
@@ -137,7 +148,7 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 //        players.add("Pa");
 
         // set up the RecyclerView
-        RecyclerView recyclerView = findViewById(R.id.my_recycler_view);
+        recyclerView = findViewById(R.id.my_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         LinearLayoutManager mlm = (LinearLayoutManager) recyclerView.getLayoutManager();
@@ -152,15 +163,6 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
         mAdapter = new MyAdapter(this, players);
         mAdapter.setClickListener(this);
         recyclerView.setAdapter(mAdapter);
-
-
-
-
-
-
-
-
-
 
 
         ValueEventListener valueEventListener = online_user_ref.addValueEventListener(new ValueEventListener()
@@ -180,10 +182,6 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
                 {
 
                     Userlist.add(String.valueOf(dsp.getKey()));
-
-                   // players.add(Userlist.get(i));
-
-
 
 
                 }
@@ -215,12 +213,6 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
                 });
 
 
-
-
-
-
-
-
             }
 
             @Override
@@ -235,10 +227,6 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 
         // method to start the server service.
         startServerDevice();
-
-
-
-
 
     }
 
@@ -275,7 +263,6 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 
                 String name = wroupDevice.getDeviceName();
                 Toast.makeText(getApplicationContext(), "Client = " + name, Toast.LENGTH_SHORT).show();
-
 
             }
         });
@@ -354,15 +341,43 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
         registerReceiver(wiFiDirectBroadcastReceiver, intentFilter);
 
 
-
-
-
     }
 
 
     @Override
     public void onItemClick(View view, int position)
     {
+
+        if(count < max_players)
+        {
+            count ++;
+            //Toast.makeText(getApplicationContext(),"Clicked item" + position,Toast.LENGTH_SHORT).show();
+            recyclerView.getChildAt(position).setBackgroundColor(Color.GREEN);
+
+            players_left = max_players - count;
+
+            Toast.makeText(getApplicationContext(),"Players Left : " + players_left,Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Added Player " + Userlist.get(position),Toast.LENGTH_SHORT).show();
+
+            if(count == 1)
+            {
+                Live_players.child("player1").child("name").setValue(Userlist.get(position));
+            }
+
+            if(count == 2)
+            {
+                Live_players.child("player2").child("name").setValue(Userlist.get(position));
+            }
+
+            if(count == 3)
+            {
+                Live_players.child("player3").child("name").setValue(Userlist.get(position));
+            }
+
+
+        }
+
+
 
     }
 
