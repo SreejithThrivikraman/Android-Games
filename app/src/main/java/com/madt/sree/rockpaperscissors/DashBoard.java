@@ -88,6 +88,7 @@ public class DashBoard extends AppCompatActivity
             {
                 CreateGame(player_name_value);
                 Intent host_screen = new Intent(getApplicationContext(),waiting_for_players.class);
+                host_screen.putExtra("Player Name", player_name_value);
                 startActivity(host_screen);
             }
 

@@ -66,7 +66,7 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 
     // Database references.
     public DatabaseReference online_user_ref = database.getReference("OnlineUsers");
-    public DatabaseReference status = database.getReference("Game/status");
+    public DatabaseReference status = database.getReference("games/status");
     public DatabaseReference Live_players = database.getReference("Game");
 
     private WiFiDirectBroadcastReceiver wiFiDirectBroadcastReceiver;
@@ -92,6 +92,7 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
     public Integer max_players = 3;
     public Integer players_left = 0;
     public Integer count = 0;
+    public String client_player = "";
 
 
     public  ArrayList<String> players = new ArrayList<>();
@@ -118,15 +119,15 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 
 
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
 
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting_for_players);
+
+        Bundle bundle  = getIntent().getExtras();
+        client_player = bundle.getString("Player Name");
 
 
         player_1_label = findViewById(R.id.player_1);
@@ -138,6 +139,8 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 
 
         wroupService = WroupService.getInstance(getApplicationContext());
+        // method to start the server service.
+        startServerDevice();
 
         System.out.println(">>>>>>>>>>>>>> Host Name : " + HostName);
 
@@ -225,8 +228,7 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
         });
 
 
-        // method to start the server service.
-        startServerDevice();
+
 
     }
 
@@ -383,9 +385,10 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 
     public void start_game(View v)
     {
-        status.setValue(true);
+        status.setValue("true");
 
         Intent game = new Intent(this,GameActivity.class);
+        game.putExtra("player_name", client_player);
         startActivity(game);
     }
 

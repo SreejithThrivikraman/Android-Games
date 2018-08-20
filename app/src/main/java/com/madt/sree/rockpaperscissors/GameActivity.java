@@ -7,9 +7,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -20,11 +22,21 @@ import com.squareup.seismic.ShakeDetector;
 
 import java.util.Random;
 
-public class GameActivity extends AppCompatActivity implements ShakeDetector.Listener {
+public class GameActivity extends AppCompatActivity implements ShakeDetector.Listener
+{
     final Random rnd = new Random();
+
     TextView players;
     TextView playerScore;
     String playerId="player1";
+
+
+    String game_player_name = "";
+    String game_player_node = "";
+
+    public final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    public DatabaseReference node  = database.getReference("Game");
+
 
     @Override
     public void hearShake() {
@@ -53,20 +65,41 @@ public class GameActivity extends AppCompatActivity implements ShakeDetector.Lis
         }
         else
         {
+            String value = "none";
+            if (ResourceID == 2131165291)
+            {
+                value = "Rock";
+            }
+            else if(ResourceID == 2131165292)
+            {
+                value = "Scissor";
+            }
+            else if(ResourceID == 2131165293)
+            {
+                value = "Paper";
+            }
+
+            DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("Game/player1");
+
+            myRef.child("selected").setValue(value);
+
             return ResourceID;
         }
     }
 
-    public static class player {
+    public static class player
+    {
 
         public String name, selected;
         public int score;
         public boolean status;
 
-        public player() {
+        public player()
+        {
 
         }
-        public player(String name, Integer score, String selected, Boolean status) {
+        public player(String name, Integer score, String selected, Boolean status)
+        {
             this.name = name;
             this.score = score;
             this.selected = selected;
@@ -77,25 +110,83 @@ public class GameActivity extends AppCompatActivity implements ShakeDetector.Lis
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+        Bundle bundle = getIntent().getExtras();
+        game_player_name = bundle.getString("player_name");
+
+
         SensorManager manager = (SensorManager) getSystemService(SENSOR_SERVICE);
         ShakeDetector detector = new ShakeDetector(GameActivity.this);
         detector.start(manager);
+
+
+
+
+
+        node.addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+
+
+            {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren())
+                {
+
+                    player p_name = (player) postSnapshot.getValue(player.class);
+
+                    String a = p_name.name;
+
+
+                    if(a.equals(game_player_name))
+                    {
+                        game_player_node = "player1";
+                    }
+
+                    if(a.equals(game_player_name))
+                    {
+                        game_player_node = "player2";
+                    }
+
+                    if(a.equals(game_player_name))
+                    {
+                        game_player_node = "player3";
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+
+            }
+
+        });
+
+        Toast.makeText(getApplicationContext(),"Player node = " + game_player_node,Toast.LENGTH_SHORT).show();
+
+
+
+
+        // dilpreet : check for score update ... test code.
         if(playerId == "player1") {
 
         DatabaseReference ref = database.getReference("Game/player1");
         players = (TextView) findViewById(R.id.textViewP);
         playerScore = (TextView) findViewById(R.id.textViewS);
+
         ref.addValueEventListener(new ValueEventListener() {
 
 
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
 //set player
 
                     player player = dataSnapshot.getValue(player.class);
@@ -124,7 +215,8 @@ public class GameActivity extends AppCompatActivity implements ShakeDetector.Lis
 
 
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+                public void onDataChange(DataSnapshot dataSnapshot)
+                {
 //set player
 
                     player player = dataSnapshot.getValue(player.class);

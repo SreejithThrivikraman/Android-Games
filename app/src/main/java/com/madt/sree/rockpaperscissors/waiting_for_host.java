@@ -38,13 +38,16 @@ public class waiting_for_host extends AppCompatActivity
 {
 
 
-    FirebaseDatabase database;
-    DatabaseReference root,initialise;
+    public FirebaseDatabase database;
+
+    public DatabaseReference  initialise;
+
 
 
     private String TAG_CLIENT = "Client module : ";
     private ArrayAdapter adapter;//adapter for listView
     private WiFiDirectBroadcastReceiver wiFiDirectBroadcastReceiver;
+    public DatabaseReference root;
     public String name = "";
     Handler wait = new Handler();
     public String client_player = "";
@@ -60,15 +63,16 @@ public class waiting_for_host extends AppCompatActivity
 
     // firebase codes for child listner
 
-    public static class Game {
+    public static class Game
+    {
 
-        public Boolean status;
+        public String status;
 
         public Game()
         {
 
         }
-        public Game(Boolean status)
+        public Game(String status)
         {
             this.status = status;
             // ...
@@ -84,21 +88,30 @@ public class waiting_for_host extends AppCompatActivity
             public void run() {
 
                 Log.d("check","in running state");
-                root.orderByChild("status").addListenerForSingleValueEvent(new ValueEventListener()  {
+
+
+                root.child("status").addListenerForSingleValueEvent(new ValueEventListener()  {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
 
-                            //System.out.println(snapshot.getValue().toString());
+                            System.out.println(snapshot.getValue().toString());
 
-                            Game game = snapshot.getValue(Game.class);
+
+                            Game game = new Game(snapshot.getValue().toString());
+
                             System.out.println(game.status);
 
                             //start intent for rock/paper/scissor game here whenever value is true
 
-                        if(game.status == true)
+                        if(game.status.equals("true"))
                         {
                             System.out.println("Starting intent.....");
+
+
+
+
                             Intent intent = new Intent(waiting_for_host.this, GameActivity.class);
+                            intent.putExtra("player_name", client_player);
                             startActivity(intent);
                         }
 
@@ -140,8 +153,11 @@ public class waiting_for_host extends AppCompatActivity
         setContentView(R.layout.activity_waiting_for_host);
         database = FirebaseDatabase.getInstance();
 
-        root = database.getReference("Game");
-        Log.d("check","in oncfeate state");
+
+
+        root = database.getReference("games");
+
+        Log.d("check","in oncreate state");
 
         initialise = database.getReference("OnlineUsers");
         Log.d("check","Created client name");
@@ -153,12 +169,13 @@ public class waiting_for_host extends AppCompatActivity
 
 
         wroupClient = WroupClient.getInstance(getApplicationContext());
+        // method to start the client service.
+        startClientDevice();
 
         Bundle bundle  = getIntent().getExtras();
         client_player  = bundle.getString("Player Name");
 
-        // method to start the client service.
-        startClientDevice();
+
 
 
 
@@ -177,7 +194,7 @@ public class waiting_for_host extends AppCompatActivity
                 // Found new server Device.
 
 
-
+                System.out.println("searching for servers >>>>>>>>>>>>>>>>>>>");
                 name = serviceDevice.getTxtRecordMap().get(WroupService.SERVICE_GROUP_NAME);
                 host_name_label.append(name);
 
