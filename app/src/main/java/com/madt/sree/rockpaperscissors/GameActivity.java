@@ -26,6 +26,8 @@ public class GameActivity extends AppCompatActivity implements ShakeDetector.Lis
 {
     final Random rnd = new Random();
 
+    String [] nodes_name = {"player1","player2","player3"};
+
     TextView players;
     TextView playerScore;
     String playerId="player1";
@@ -129,13 +131,15 @@ public class GameActivity extends AppCompatActivity implements ShakeDetector.Lis
 
 
 
+
+
         node.addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
 
 
-            {
+            {   Integer i = 0;
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren())
                 {
 
@@ -146,18 +150,11 @@ public class GameActivity extends AppCompatActivity implements ShakeDetector.Lis
 
                     if(a.equals(game_player_name))
                     {
-                        game_player_node = "player1";
+                        game_player_node = nodes_name[i];
+                        i = i + 1;
                     }
 
-                    if(a.equals(game_player_name))
-                    {
-                        game_player_node = "player2";
-                    }
 
-                    if(a.equals(game_player_name))
-                    {
-                        game_player_node = "player3";
-                    }
                 }
             }
 
