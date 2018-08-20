@@ -3,7 +3,7 @@
 
 
     >
-    <item android:drawable="@drawable/stone" android:duration="1000" />
-    <item android:drawable="@drawable/paper" android:duration="1000" />
-    <item android:drawable="@drawable/scissors" android:duration="1000" />
+    <item android:drawable="@drawable/img_0" android:duration="1000" />
+    <item android:drawable="@drawable/img_1" android:duration="1000" />
+    <item android:drawable="@drawable/img_2" android:duration="1000" />
 </animation-list>

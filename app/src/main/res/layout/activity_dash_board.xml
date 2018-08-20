@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:paddingTop="60dp"
-        app:srcCompat="@drawable/scissors"
+        app:srcCompat="@drawable/img_0"
         android:layout_margin="16dp"/>
 
 

@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.abemart.wroup.common.WiFiDirectBroadcastReceiver;
 import com.abemart.wroup.common.WiFiP2PError;
@@ -62,6 +63,7 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
     public FirebaseDatabase database = FirebaseDatabase.getInstance();
 
     public DatabaseReference online_user_ref = database.getReference("OnlineUsers");
+    public DatabaseReference status = database.getReference("Game/status");
 
     private WiFiDirectBroadcastReceiver wiFiDirectBroadcastReceiver;
 
@@ -351,7 +353,7 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         registerReceiver(wiFiDirectBroadcastReceiver, intentFilter);
 
-       
+
 
 
 
@@ -359,7 +361,17 @@ public class waiting_for_players extends AppCompatActivity implements MyAdapter.
 
 
     @Override
-    public void onItemClick(View view, int position) {
+    public void onItemClick(View view, int position)
+    {
 
     }
+
+    public void start_game(View v)
+    {
+        status.setValue(true);
+
+        Intent game = new Intent(this,GameActivity.class);
+        startActivity(game);
+    }
+
 }
